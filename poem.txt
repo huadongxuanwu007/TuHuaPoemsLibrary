@@ -1,0 +1,11 @@
+输入 collectionId 带分页
+输出 id title dynasty authorName content
+
+输入 author 带分页
+输出 id title dynasty authorName content
+
+输入 workId
+输出  title dynasty authorName content translation intro appreciation masterComment
+
+
+
