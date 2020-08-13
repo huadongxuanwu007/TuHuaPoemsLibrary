@@ -48,11 +48,12 @@
 				<b-icon icon="chevron-up" variant="white" style="width: 3vw; height:3vw;" scale="1.5" v-show="classicUnfold"></b-icon>
 			</div>
 		</div>
-		<div class="mycontainer" v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="50">
+		<div class="mycontainer" v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="50"
+		 @touchstart="onSwipestart">
 			<!-- container-fluid的作用是100%的宽度，占据全部视口（viewport）的宽度  justify-content-center -->
 			<div class="container-fluid">
 				<div id="rowdiv" class="row">
-					<div class="mycol col-12 " v-for="data in contentList" @click="goDetailPage(data.workId)">
+					<div class="mycol col-12 " v-for="data in contentList" @click="goDetailPage(data.id)">
 						<div class="listItem mt-2">
 							<div class="listItembox">
 								<span>{{ data.title }}</span>
@@ -64,8 +65,8 @@
 				</div>
 			</div>
 			<scrollTop />
+			<p class="mb-0" :class=" {'invisible': notEnd  }">没有更多了～</p>
 		</div>
-		<p class="mb-0" :class=" {'invisible': notEnd  }">没有更多了～</p>
 	</div>
 </template>
 
@@ -238,7 +239,7 @@
 						collectionId: 13,
 						name: "诗经全集",
 						isChoose: false,
-					}, 
+					},
 					{
 						collectionId: 140,
 						name: "幼学琼林",
@@ -278,6 +279,12 @@
 			}
 		},
 		methods: {
+			onSwipestart() {
+				this.primaryUnfold = false;
+				this.juniorUnfold = false;
+				this.seniorHighUnfold = false;
+				this.classicUnfold = false;
+			},
 			unfoldChange1() {
 				this.primaryUnfold = !this.primaryUnfold;
 				this.juniorUnfold = false;
@@ -412,17 +419,12 @@
 					this.notEnd = false;
 				} else {
 					if (this.collectionId == 0) {
-						this.url = this.$base.format(
-							"https://wx.tuhua.ink/api/app/poetrydetails?page={0}&size=10&dynasty=&key=&kindCN=诗&authorName=", this.page);
+						this.url = this.$base.format(this.$store.state.url.getPoetryList, this.page, '', '', '诗', '', '');
 					} else {
-						this.url = this.$base.format(
-							"https://wx.tuhua.ink/api/app/poetrydetails?page={0}&size=10&dynasty=&key=&kindCN=&authorName=&collectionId={1}",
-							this.page,
-							this.collectionId);
+						this.url = this.$base.format(this.$store.state.url.getPoetryList, this.page, '', '', '', '', this.collectionId);
 					}
 					this.$http.get(this.url)
 						.then(response => {
-							console.log("data:", response.data);
 							this.contentList = this.contentList.concat(response.data);
 							if (response.data.length < 10) {
 								this.lastPage = true;
@@ -438,7 +440,7 @@
 			},
 			goDetailPage(input) {
 				this.$router.push({
-					path: 'poemtryDetail',
+					path: 'poetryDetail',
 					query: {
 						workId: input
 					}
@@ -450,8 +452,8 @@
 
 <style>
 	#teaching {
-		width: 95%;
-		height: calc(96vh - 31vw);
+		width: 100%;
+		height: calc(100vh - 28vw);
 		display: flex;
 		display: -webkit-flex;
 		flex-direction: column;
@@ -466,11 +468,13 @@
 		flex-direction: row;
 		flex-wrap: inherit;
 		justify-content: left;
+		border-bottom: 1px solid #ddd;
+		padding: 0 2.5vw;
 	}
 
 	#teaching .topbar p {
-		/* 		width: 15vw; */
 		font-size: 5vw;
+		margin: 0.325rem 0 0 0;
 	}
 
 	#teaching .unfoldBox {
@@ -488,12 +492,11 @@
 		flex: 1;
 		display: flex;
 		display: -webkit-flex;
+		display: -moz-flex;
 		flex-wrap: wrap;
 		flex-direction: row;
 		justify-items: stretch;
-		justify-content: start;
-		/* justify-content: left; */
-
+		justify-content: flex-start;
 		height: 2rem;
 		overflow-Y: hidden;
 	}
@@ -514,7 +517,7 @@
 	}
 
 	#teaching .booksItem {
-		margin: 0.25rem;
+		margin: 0.325rem 0.25rem;
 		font-size: 4vw;
 		color: #646464;
 		border-radius: 5px;
@@ -535,7 +538,9 @@
 	#teaching .mycontainer {
 		width: 100%;
 		flex: 1;
-		overflow-y: auto;
+		overflow-y: scroll;
+		-webkit-overflow-scrolling: touch;
+		padding: 0 2.5vw;
 	}
 
 	#teaching .mycontainer p {
@@ -549,7 +554,6 @@
 
 	#teaching .listItem {
 		width: 100%;
-		/* 	height: 25vh; */
 		border-radius: 10px;
 		border: #dabc95 1px solid;
 		padding: 0.5rem 1rem;
@@ -561,7 +565,6 @@
 		overflow-y: hidden;
 		display: flex;
 		display: -webkit-flex;
-		/* 		flex-wrap: wrap; */
 		flex-direction: column;
 		justify-items: center;
 		align-content: center;
@@ -584,18 +587,8 @@
 		margin-top: 2vw;
 	}
 
-	/* #teaching .listItem span:nth-child(3) {
-		font-size: 1rem;
-		text-align: left;
-		text-wrap: wrap;
-
-	} */
-
 	#teaching .poemContent {
-		/* margin-top: 2vw; */
 		text-align: center;
-		/* background-color: #fff;
-		border: none; */
 		line-height: 2;
 		overflow-y: hidden;
 	}

@@ -1,5 +1,6 @@
 <template>
 	<div id="authorDetail">
+		<goBackButton />
 		<div class="topbar">
 			<p>{{ authorName }}</p>
 			<p>[{{ dynasty }}] {{ birthYear }}-{{ deathYear }}</p>
@@ -10,7 +11,7 @@
 			<!-- container-fluid的作用是100%的宽度，占据全部视口（viewport）的宽度  justify-content-center -->
 			<div class="container-fluid">
 				<div id="rowdiv" class="row">
-					<div class="mycol col-12 " v-for="data in contentList" @click="goDetailPage(data.workId)">
+					<div class="mycol col-12 " v-for="data in contentList" @click="goDetailPage(data.id)">
 						<div class="listItem mt-2">
 							<div class="listItembox">
 								<span>{{ data.title }}</span>
@@ -22,6 +23,9 @@
 			</div>
 			<scrollTop />
 		</div>
+		<div class="loading" v-if="!loadingEnd">
+			<b-spinner class="loadItem"></b-spinner>
+		</div>
 		<p class="mb-0" :class=" {'invisible': notEnd  }">没有更多了～</p>
 	</div>
 </template>
@@ -32,6 +36,7 @@
 		data() {
 			return {
 				contentList: [],
+				loadingEnd: false,
 				author: null,
 				authorName: '',
 				dynasty: '',
@@ -45,13 +50,7 @@
 			};
 		},
 		mounted() {
-			console.log("加载数据：", this.$options.name);
-			this.author = this.$route.query.author;
-			this.authorName = this.author.name;
-			this.dynasty = this.author.dynasty;
-			this.birthYear = this.author.birthYear;
-			this.deathYear = this.author.deathYear;
-			this.desc = this.author.desc;
+			this.getAuthorDetail();
 			this.loadMore();
 		},
 		activated() {
@@ -64,11 +63,27 @@
 		methods: {
 			goDetailPage(id) {
 				this.$router.push({
-					path: 'poemtryDetail',
+					path: 'poetryDetail',
 					query: {
 						workId: id
 					}
 				})
+			},
+			getAuthorDetail() {
+				this.$http.get(this.$base.format(
+						this.$store.state.url.getAuthorDetail, this.$route.query.authorId))
+					.then(response => {
+						this.authorName = response.data.name;
+						this.dynasty = response.data.dynasty;
+						this.birthYear = response.data.birthYear;
+						this.deathYear = response.data.deathYear;
+						this.desc = response.data.desc;
+						this.loadingEnd = true;
+					})
+					.catch(err => {
+						console.log(err);
+						this.busy = false;
+					})
 			},
 			loadMore() {
 				this.busy = true;
@@ -76,10 +91,9 @@
 					this.notEnd = false;
 				} else {
 					this.$http.get(this.$base.format(
-							"https://wx.tuhua.ink/api/app/poetrydetails?page={0}&size=10&dynasty={1}&key=&kindCN=&authorName={2}", this.page,
-							this.author.dynasty, this.author.name))
+							this.$store.state.url.getPoetryList, this.page,
+							this.$route.query.dynasty, '', '', this.$route.query.authorName, ''))
 						.then(response => {
-							console.log("data:", response.data);
 							this.contentList = this.contentList.concat(response.data);
 							if (response.data.length < 10) {
 								this.lastPage = true;
@@ -100,15 +114,12 @@
 <style>
 	#authorDetail {
 		width: 100%;
-		height: calc(96vh - 3vw);
+		height: 100%;
 		display: flex;
 		display: -webkit-flex;
 		flex-direction: column;
-	/* 	justify-content: center;
-		justify-items: center; */
 		align-items: center;
-	/* 	align-content: center; */
-		padding: 2.5vw 0vw;
+		padding: 0 0 2.5vw 0;
 	}
 
 	#authorDetail .subfield {
@@ -121,7 +132,8 @@
 	#authorDetail .mycontainer {
 		width: 95%;
 		flex: 1;
-		overflow-y: auto;
+		overflow-y: scroll;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	#authorDetail .mycontainer p {
@@ -182,7 +194,6 @@
 		overflow-y: hidden;
 		display: flex;
 		display: -webkit-flex;
-		/* 		flex-wrap: wrap; */
 		flex-direction: column;
 		justify-items: center;
 		align-content: center;
@@ -200,21 +211,28 @@
 		margin-top: 2vw;
 	}
 
-
-	/* #authorDetail .listItem span:nth-child(3) {
-		font-size: 1rem;
-		text-align: left;
-		text-wrap: wrap;
-
-	} */
-
 	#authorDetail .listItem .poemContent {
-		/* margin-top: 2vw; */
 		text-align: center;
-		/* background-color: #fff;
-		border: none; */
 		height: 2rem;
 		line-height: 2;
 		overflow-y: hidden;
+	}
+
+	#authorDetail .loading {
+		width: 100%;
+		height: 100%;
+		position: fixed;
+		top: 0;
+		background-color: #FFFFFF;
+		z-index: 50;
+		display: flex;
+		display: -webkit-flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	#authorDetail .loadItem {
+		flex: none;
+		color: #dabc95;
 	}
 </style>

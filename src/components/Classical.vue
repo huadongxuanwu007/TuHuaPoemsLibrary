@@ -1,16 +1,18 @@
 <template>
 	<div id="classical">
-		<div class="lunboBox">
-			<div class="lunbo">
-				<b-carousel id="carousel" style="border-radius: 3vw; overflow: hidden;" indicators img-width="300" img-height="150">
-					<b-carousel-slide img-src="https://picsum.photos/1024/480/?image=10"></b-carousel-slide>
-					<b-carousel-slide img-src="https://picsum.photos/1024/480/?image=12"></b-carousel-slide>
-					<b-carousel-slide img-src="https://picsum.photos/1024/480/?image=22"></b-carousel-slide>
-					<b-carousel-slide img-src="https://picsum.photos/1024/480/?image=23"></b-carousel-slide>
-				</b-carousel>
-			</div>
-		</div>
 		<div class="mycontainer" v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="50">
+			<div class="lunboBox">
+				<div class="lunbo">
+					<b-carousel id="carousel" style="border-radius: 3vw; overflow: hidden;" indicators img-width="300" img-height="150">
+						<b-carousel-slide img-src="http://tuhuapublic.tuhua.ink/WebPage/Images/001.jpg"></b-carousel-slide>
+						<b-carousel-slide img-src="http://tuhuapublic.tuhua.ink/WebPage/Images/002.jpg"></b-carousel-slide>
+						<b-carousel-slide img-src="http://tuhuapublic.tuhua.ink/WebPage/Images/003.jpg"></b-carousel-slide>
+						<b-carousel-slide img-src="http://tuhuapublic.tuhua.ink/WebPage/Images/004.jpg"></b-carousel-slide>
+						<b-carousel-slide img-src="http://tuhuapublic.tuhua.ink/WebPage/Images/005.jpg"></b-carousel-slide>
+						<b-carousel-slide img-src="http://tuhuapublic.tuhua.ink/WebPage/Images/006.jpg"></b-carousel-slide>
+					</b-carousel>
+				</div>
+			</div>
 			<!-- container-fluid的作用是100%的宽度，占据全部视口（viewport）的宽度  justify-content-center -->
 			<div class="container-fluid">
 				<div id="rowdiv" class="row justify-content-center">
@@ -19,21 +21,16 @@
 							<div class="listItemImg" :style="'background-image:url('+data.cover+')'"></div>
 							<p class="listItemText">{{ data.name }}</p>
 						</div>
-						<!-- <b-card v-bind:title="data.name" v-bind:img-src="data.cover" img-alt="Image" img-top tag="article" style="max-width: 20rem;"
-						 class="mt-2 mb-2" >
-						</b-card> -->
 					</div>
 				</div>
 			</div>
-			<scrollTop/>
+			<scrollTop />
+			<p class="mb-0" :class=" {'invisible': notEnd  }">没有更多了～</p>
 		</div>
-		<p class="mb-0" :class=" {'invisible': notEnd  }">没有更多了～</p>
-		
 	</div>
 </template>
 
 <script>
-	
 	export default {
 		data() {
 			return {
@@ -44,12 +41,13 @@
 				busy: false,
 				kindIdList: ["选集", "主题", "写景", "节日", "节气", "教材", "词牌", "时令", "用典", "地标"]
 			};
-		},activated() {
-		    const scrollTop = this.$route.meta.scrollTop;
-		    const $content = document.querySelector('.mycontainer');
-		    if (scrollTop && $content) {
-		      $content.scrollTop = scrollTop;
-		    }
+		},
+		activated() {
+			const scrollTop = this.$route.meta.scrollTop;
+			const $content = document.querySelector('.mycontainer');
+			if (scrollTop && $content) {
+				$content.scrollTop = scrollTop;
+			}
 		},
 		methods: {
 			loadMore() {
@@ -72,14 +70,12 @@
 						c = 6;
 					} else {
 						c = Math.floor(w / 120);
-
-						// console.log("size",size);
 					}
-					this.$http.get(this.$base.format("https://wx.tuhua.ink//api/app/collectionsbylkindid?kindId={0}", this.kindId))
+					this.$http.get(this.$base.format(this.$store.state.url.getCollections, this.kindId))
 						.then(response => {
 							var data = response.data;
 							for (var a = 0; a < data.length; a++) {
-								//data[a].imageUrl += "?imageView2/1/w/280/h/200/format/jpg/q/75";
+								data.cover += "?imageView2/1/w/100/h/100/format/jpg/q/75";
 								this.contentList.push(data[a]);
 							}
 
@@ -102,9 +98,8 @@
 							this.busy = false;
 						})
 				}
-
 			},
-			goDetailPage(name,id) {
+			goDetailPage(name, id) {
 				this.$router.push({
 					path: 'collectionDetail',
 					query: {
@@ -113,17 +108,6 @@
 					}
 				})
 			},
-			// handleScroll(e) {
-			// 	var scrollTop = this.$refs.myscroll.scrollTop;
-			// 	console.log("滚动高度：", scrollTop);
-			// },
-			// GoScrollTop(e){
-			// 	var scrollTop = this.$refs.myscroll.scrollTop;
-			// 	console.log("滚动高度：", scrollTop);
-			// 	this.$refs.myscroll.scrollTop=0;
-			// 	e.currentTarget.parentElement
-			// 	console.log("回到底部");
-			// }
 		},
 	};
 </script>
@@ -131,7 +115,7 @@
 <style>
 	#classical {
 		width: 95%;
-		height: calc(96vh - 31vw);
+		height: calc(100vh - 28vw);
 		display: flex;
 		display: -webkit-flex;
 		flex-direction: column;
@@ -153,8 +137,8 @@
 	#classical .mycontainer {
 		width: 100%;
 		flex: 1;
-		/* 		height: calc(109vh - 84vw); */
-		overflow-y: auto;
+		overflow-y: scroll;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	#classical .mycontainer span {
@@ -169,6 +153,8 @@
 		padding-right: 3vw;
 		text-align: left;
 		font-size: 1.5em;
+		padding-bottom: 10px;
+		border-bottom: #dabc95 1px dashed;
 	}
 
 	#classical .listItem {
@@ -196,11 +182,4 @@
 	#classical .listItemText {
 		font-size: 0.5em;
 	}
-
-	/* #classical .mycol {
-		padding-left: 5px !important;
-		padding-right: 5px !important;
-	} */
-
-	
 </style>

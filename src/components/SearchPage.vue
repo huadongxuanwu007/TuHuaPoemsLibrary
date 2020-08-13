@@ -9,13 +9,12 @@
 				</div>
 			</div>
 		</div>
-
+		<goBackButton/>
 		<div class="mycontainer" v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="50">
-			<!--  -->
 			<!-- container-fluid的作用是100%的宽度，占据全部视口（viewport）的宽度  justify-content-center -->
 			<div class="container-fluid">
 				<div id="rowdiv" class="row">
-					<div class="mycol col-12 " v-for="data in contentList" @click="goDetailPage(data.workId)">
+					<div class="mycol col-12 " v-for="data in contentList" @click="goDetailPage(data.id)">
 						<div class="listItem mt-2">
 							<div class="listItembox">
 								<span>{{ data.title }}</span>
@@ -43,7 +42,6 @@
 		name: 'search',
 		data() {
 			return {
-
 				contentList: [],
 				startSearch: false,
 				empty: false,
@@ -54,17 +52,17 @@
 				busy: true,
 				topSearchList: [
 					"水调歌头",
-					"滕王阁序",
+					"如梦令",
 					"将进酒",
 					"满江红",
 					"元日",
-					"陋室铭",
+					"浣溪沙",
 					"爱莲说",
-					"岳阳楼记",
+					"鹊桥仙",
 					"沁园春",
 					"春望",
-					"桃花源记",
-					"长恨歌"
+					"苏幕遮",
+					"点绛唇"
 				],
 			}
 		},
@@ -126,16 +124,13 @@
 				this.startSearch = true;
 			},
 			loadMore() {
-				console.log("加载更多");
 				this.busy = true;
 				if (this.lastPage) {
 					this.notEnd = false;
 				} else {
-					this.$http.get(this.$base.format(
-							"https://wx.tuhua.ink/api/app/poetrydetails?page={0}&size=10&dynasty=&key={1}&kindCN=&authorName=", this.page,
-							this.searchpro))
+					this.$http.get(this.$base.format(this.$store.state.url.getPoetryList, this.page,'',
+							this.searchpro,'','',''))
 						.then(response => {
-							console.log("data:", response.data);
 							this.contentList = this.contentList.concat(response.data);
 							if (response.data.length < 10) {
 								this.lastPage = true;
@@ -151,7 +146,7 @@
 			},
 			goDetailPage(input) {
 				this.$router.push({
-					path: 'poemtryDetail',
+					path: 'poetryDetail',
 					query: {
 						workId: input
 					}
@@ -162,17 +157,9 @@
 </script>
 
 <style>
-	/* 	#searchPage {
-		display: flex;
-		width: 100%;
-		display: -webkit-flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	} */
 	#searchPage {
 		width: 100%;
-		height: calc(96vh - 3vw);
+		height: 100%;
 		display: flex;
 		display: -webkit-flex;
 		flex-direction: column;
@@ -224,6 +211,23 @@
 		font-size: 5vw;
 	}
 
+	#searchPage .searchBox .search::-webkit-input-placeholder {
+		color: #ccc;
+	}
+
+	#searchPage .searchBox .search::-moz-placeholder {
+		color: #ccc;
+	}
+
+	#searchPage .searchBox .search::-moz-placeholder {
+		color: #ccc;
+	}
+
+	#searchPage .searchBox .search::-ms-input-placeholder {
+		color: #ccc;
+	}
+	
+
 	#searchPage .topSearch {
 		position: fixed;
 		top: calc(16vw + 5vh);
@@ -237,7 +241,6 @@
 		flex-wrap: wrap;
 		justify-content: left;
 		align-content: flex-start;
-		/* align-items: flex-start; */
 		padding: 1rem;
 	}
 
@@ -263,7 +266,8 @@
 	#searchPage .mycontainer {
 		width: 95%;
 		flex: 1;
-		overflow-y: auto;
+		overflow-y: scroll;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	#searchPage .mycontainer p {
@@ -277,7 +281,6 @@
 
 	#searchPage .listItem {
 		width: 100%;
-		/* 	height: 25vh; */
 		border-radius: 10px;
 		border: #dabc95 1px solid;
 		padding: 0.5rem 1rem;
@@ -289,7 +292,6 @@
 		overflow-y: hidden;
 		display: flex;
 		display: -webkit-flex;
-		/* 		flex-wrap: wrap; */
 		flex-direction: column;
 		justify-items: center;
 		align-content: center;
@@ -312,18 +314,8 @@
 		margin-top: 2vw;
 	}
 
-	/* #searchPage .listItem span:nth-child(3) {
-		font-size: 1rem;
-		text-align: left;
-		text-wrap: wrap;
-	
-	} */
-
 	#searchPage .poemContent {
-		/* margin-top: 2vw; */
 		text-align: center;
-		/* background-color: #fff;
-		border: none; */
 		line-height: 2;
 		overflow-y: hidden;
 	}

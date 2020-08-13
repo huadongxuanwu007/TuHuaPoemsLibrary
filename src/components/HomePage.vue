@@ -17,25 +17,7 @@
 			</div>
 		</div>
 		<component v-bind:is="nowComponent"></component>
-
-
-
-		<!-- <ul>
-			<li>
-				<button>点我跳转到菜单</router-link>
-			</li>
-			<li>
-				<router-link to="/first">点我跳转到第一页</router-link>
-			</li>
-			<li>
-				<router-link to="/Second">点我跳转到第二页</router-link>
-			</li>
-			<li>
-				<router-link to="/ss">点我跳转到404</router-link>
-			</li>
-		</ul> -->
 	</div>
-
 </template>
 
 <script>
@@ -80,7 +62,6 @@
 			teaching: (resolve) => require(['./Teaching.vue'], resolve),
 		},
 		mounted() {
-			console.log("加载数据：",this.$options.name);
 			this.changeclassification(this.classifications[0]);
 		},
 		activated() {
@@ -123,6 +104,8 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
+		box-shadow: 1px 1px 1px #ddd;
+		margin-bottom: 5px;
 	}
 
 	#homePage .searchBar {
@@ -147,15 +130,12 @@
 	}
 
 	#homePage .searchBox span {
-	/* 	background: none;
-		outline: none;
-		border: none; */
 		color: #757575;
 		font-size: 5vw;
 	}
 
 	#homePage .labelBar {
-		height: 15vw;
+		height: 12vw;
 		width: 100%;
 		background-color: #fff;
 		display: flex;

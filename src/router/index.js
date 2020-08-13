@@ -11,6 +11,14 @@ const router = new VueRouter({
 			keepAlive: true,
 			scrollTop: 0,
 		}
+	},{
+		name: 'pcHome',
+		path: '/pcHome',
+		component: (resolve) => require(['../components/PCHomePage.vue'], resolve),
+		meta: {
+			keepAlive: true,
+			scrollTop: 0,
+		}
 	}, {
 		name: 'search',
 		path: '/search',
@@ -36,9 +44,9 @@ const router = new VueRouter({
 			scrollTop: 0,
 		}
 	}, {
-		name: 'poemtryDetail',
-		path: '/poemtryDetail',
-		component: (resolve) => require(['../components/PoemtryDetailPage.vue'], resolve),
+		name: 'poetryDetail',
+		path: '/poetryDetail',
+		component: (resolve) => require(['../components/PoetryDetailPage.vue'], resolve),
 		meta: {
 			keepAlive: false,
 			scrollTop: 0,
@@ -59,7 +67,6 @@ router.beforeEach((to, from, next) => {
 	var li = routerList.length;
 	store.commit('addRouterHistoryLength',1);
 	store.commit('changeVisibility', true);
-	// console.log(store.state.includedComponents);
 	if (li > 0 && routerList[li - 1] == to.name) {
 		/*
 		  如果发现to.name等于list中当前最后一个，则说明是返回操作。
@@ -69,7 +76,6 @@ router.beforeEach((to, from, next) => {
 		 */
 		routerList.splice(routerList.length - 1, 1);
 		if (store.state.includedComponents.indexOf(from.name) > -1) {
-			// console.log('rm', from.name);
 			store.commit('removeInclude', from.name);
 			store.commit('addToExclude', from.name);
 			if (from.meta.keepAlive) {
@@ -79,20 +85,14 @@ router.beforeEach((to, from, next) => {
 	} else {
 		if (!base.isEmpty(from.name)) {
 			routerList.push(from.name);
-
 			if (from.meta.keepAlive) {
 				const $content = document.querySelector('.mycontainer');
 				const scrollTop = $content ? $content.scrollTop : 0;
-				console.log("滚动高度：", scrollTo);
 				from.meta.scrollTop = scrollTop;
 			}
 			if (store.state.excludedComponents.indexOf(to.name) > -1) {
-				// console.log('ad', to.name);
 				store.commit('removeExclude', to.name);
 				store.commit('addToInclude', to.name);
-				// if (from.meta.keepAlive) {
-
-				// }
 			}
 		}
 	}

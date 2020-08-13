@@ -23,11 +23,11 @@
 			<div class="unfoldBox invisible">
 			</div>
 		</div>
-		<div class="mycontainer" v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="50">
+		<div class="mycontainer" v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="50" @touchstart="onSwipestart">
 			<!-- container-fluid的作用是100%的宽度，占据全部视口（viewport）的宽度  justify-content-center -->
 			<div class="container-fluid">
 				<div id="rowdiv" class="row">
-					<div class="mycol col-12 " v-for="data in contentList" @click="goDetailPage(data.workId)">
+					<div class="mycol col-12 " v-for="data in contentList" @click="goDetailPage(data.id)">
 						<div class="listItem mt-2">
 							<div class="listItembox">
 								<span>{{ data.title }}</span>
@@ -39,8 +39,8 @@
 				</div>
 			</div>
 			<scrollTop />
+			<p class="mb-0" :class=" {'invisible': notEnd  }">没有更多了～</p>
 		</div>
-		<p class="mb-0" :class=" {'invisible': notEnd  }">没有更多了～</p>
 	</div>
 </template>
 
@@ -190,6 +190,9 @@
 			}
 		},
 		methods: {
+			onSwipestart(){
+				this.dynastyUnfold = false;
+			},
 			unfoldChange() {
 				this.dynastyUnfold = !this.dynastyUnfold;
 			},
@@ -226,12 +229,8 @@
 				if (this.lastPage) {
 					this.notEnd = false;
 				} else {
-					this.$http.get(this.$base.format(
-							"https://wx.tuhua.ink/api/app/poetrydetails?page={0}&size=10&dynasty={1}&key=&kindCN={2}&authorName=", this.page,
-							this.dynasty,
-							this.kindCN))
+					this.$http.get(this.$base.format(this.$store.state.url.getPoetryList, this.page, this.dynasty,'', this.kindCN,'',''))
 						.then(response => {
-							console.log("data:", response.data);
 							this.contentList = this.contentList.concat(response.data);
 							if (response.data.length < 10) {
 								this.lastPage = true;
@@ -247,7 +246,7 @@
 			},
 			goDetailPage(input) {
 				this.$router.push({
-					path: 'poemtryDetail',
+					path: 'poetryDetail',
 					query: {
 						workId: input
 					}
@@ -259,8 +258,8 @@
 
 <style>
 	#production {
-		width: 95%;
-		height: calc(96vh - 31vw);
+		width: 100%;
+		height: calc(100vh - 28vw);
 		display: flex;
 		display: -webkit-flex;
 		flex-direction: column;
@@ -269,7 +268,9 @@
 	#production .mycontainer {
 		width: 100%;
 		flex: 1;
-		overflow-y: auto;
+		overflow-y: scroll;
+		-webkit-overflow-scrolling: touch;
+		padding: 0 2.5vw ;
 	}
 
 	#production .mycontainer p {
@@ -285,11 +286,13 @@
 		flex-direction: row;
 		flex-wrap: inherit;
 		justify-content: left;
+		border-bottom: 1px solid #ddd;
+		padding: 0 2.5vw ;
 	}
 
 	#production .topbar p {
-		/* 		width: 15vw; */
 		font-size: 5vw;
+		margin: 0.325rem 0 0 0;
 	}
 
 	#production .unfoldBox {
@@ -318,15 +321,15 @@
 
 	#production .dynasty {
 		flex: 0 0 20%;
-
 	}
 
 	#production .dynastyItem {
-		margin: 0.25rem;
+		margin: 0.325rem 0.25rem;
 		font-size: 1em;
 		color: #646464;
 		border-radius: 5px;
 		border: #dabc95 1px solid;
+
 	}
 
 	#production .dynastynowChoose {
@@ -354,7 +357,7 @@
 	}
 
 	#production .kindCNItem {
-		margin: 0.25rem;
+		margin: 0.325rem 0.25rem;
 		font-size: 1em;
 		color: #646464;
 		border-radius: 5px;
@@ -384,7 +387,6 @@
 		overflow-y: hidden;
 		display: flex;
 		display: -webkit-flex;
-		/* 		flex-wrap: wrap; */
 		flex-direction: column;
 		justify-items: center;
 		align-content: center;
@@ -407,18 +409,8 @@
 		margin-top: 2vw;
 	}
 
-	/* #production .listItem span:nth-child(3) {
-		font-size: 1rem;
-		text-align: left;
-		text-wrap: wrap;
-
-	} */
-
 	#production .poemContent {
-		/* margin-top: 2vw; */
 		text-align: center;
-		/* background-color: #fff;
-		border: none; */
 		line-height: 2;
 		overflow-y: hidden;
 	}

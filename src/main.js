@@ -14,16 +14,21 @@ import {
 	BootstrapVue,
 	IconsPlugin
 } from 'bootstrap-vue'
-import ScrollTop from './components/ScrollTop.vue'
+import ScrollTop from './components/ScrollTop.vue';
+import GoBackButton from './components/GoBackButton.vue';
+import VueTouch from 'vue-touch'
 
-
+Vue.use(VueTouch, {
+	name: 'v-touch'
+});
 Vue.use(VueRouter);
 Vue.use(VueResource);
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 Vue.use(infiniteScroll);
 Vue.use(Vuex);
-Vue.component('scrollTop', ScrollTop)
+Vue.component('scrollTop', ScrollTop);
+Vue.component('goBackButton', GoBackButton);
 Vue.prototype.$base = base;
 Vue.prototype.$store = store;
 Vue.config.productionTip = false;
@@ -45,9 +50,26 @@ const app = new Vue({
 	router: router,
 	store: store,
 	render: h => h(App),
+	methods: {
+		isMobile() {
+			let flag = navigator.userAgent.match(
+				/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
+			)
+			return flag;
+		},
+		isIos() {
+			return navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);
+		},
+	},
 	mounted() {
-		return this.$router.push({
-			path: 'home'
-		});
+		if (this.isMobile()) {
+			this.$router.replace({
+				path: 'home'
+			});
+		} else {
+			this.$router.replace({
+				path: 'pcHome'
+			});
+		}
 	}
 }).$mount('#app')

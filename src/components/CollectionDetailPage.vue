@@ -1,14 +1,14 @@
 <template>
 	<div id="collectionDetail">
+		<goBackButton/>
 		<div class="topbar">
 			<span>{{ collectionName }}</span>
-
 		</div>
 		<div class="mycontainer" v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="50">
 			<!-- container-fluid的作用是100%的宽度，占据全部视口（viewport）的宽度  justify-content-center -->
 			<div class="container-fluid">
 				<div id="rowdiv" class="row">
-					<div class="mycol col-12 " v-for="data in contentList" @click="goDetailPage(data.workId)">
+					<div class="mycol col-12 " v-for="data in contentList" @click="goDetailPage(data.id)">
 						<div class="listItem mt-2">
 							<div class="listItembox">
 								<span>{{ data.title }}</span>
@@ -40,7 +40,6 @@
 			};
 		},
 		mounted() {
-			console.log("加载数据：",this.$options.name);
 			this.collectionName = this.$route.query.collectionName;
 			this.collectionId = this.$route.query.collectionId;
 			this.loadMore();
@@ -54,7 +53,7 @@
 		methods: {
 			goDetailPage(id) {
 				this.$router.push({
-					path: 'poemtryDetail',
+					path: 'poetryDetail',
 					query: {
 						workId: id
 					}
@@ -66,10 +65,9 @@
 					this.notEnd = false;
 				} else {
 					this.$http.get(this.$base.format(
-							"https://wx.tuhua.ink/api/app/poetrydetails?page={0}&size=10&dynasty=&key=&kindCN=&authorName=&collectionId={1}", this.page,
+							"https://www.tuhua.ink/api/Library/poetrydetails?page={0}&size=10&dynasty=&key=&kindCN=&authorName=&collectionId={1}", this.page,
 							this.collectionId))
 						.then(response => {
-							console.log("data:", response.data);
 							this.contentList = this.contentList.concat(response.data);
 							if (response.data.length < 10) {
 								this.lastPage = true;
@@ -90,12 +88,10 @@
 <style>
 	#collectionDetail {
 		width: 100%;
-		height: calc(96vh - 3vw);
+		height: 100%;
 		display: flex;
 		display: -webkit-flex;
 		flex-direction: column;
-		/* justify-items: center; */
-		/* padding: 0 2.5vw; */
 	}
 	#collectionDetail .topbar {
 
@@ -110,7 +106,6 @@
 	}
 
 	#collectionDetail .topbar span {
-		/* 		width: 15vw; */
 		text-align: center;
 		flex: none;
 		color: #747474;
@@ -120,7 +115,8 @@
 		width: 100%;
 		flex: 1;
 		padding: 0 2.5vw;
-		overflow-y: auto;
+		overflow-y: scroll;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	#collectionDetail .mycontainer p {
@@ -137,7 +133,6 @@
 
 	#collectionDetail .listItem {
 		width: 100%;
-		/* 	height: 25vh; */
 		border-radius: 10px;
 		border: #dabc95 1px solid;
 		padding: 0.5rem 1rem;
@@ -149,7 +144,6 @@
 		overflow-y: hidden;
 		display: flex;
 		display: -webkit-flex;
-		/* 		flex-wrap: wrap; */
 		flex-direction: column;
 		justify-items: center;
 		align-content: center;
@@ -172,18 +166,8 @@
 		margin-top: 1vw;
 	}
 
-	/* #collectionDetail .listItem span:nth-child(3) {
-		font-size: 1rem;
-		text-align: left;
-		text-wrap: wrap;
-
-	} */
-
 	#collectionDetail .poemContent {
-		/* margin-top: 2vw; */
 		text-align: center;
-		/* background-color: #fff;
-		border: none; */
 		line-height: 2;
 		overflow-y: hidden;
 	}

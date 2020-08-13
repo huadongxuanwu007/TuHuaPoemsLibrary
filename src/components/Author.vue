@@ -19,13 +19,14 @@
 								<p>{{ data.name }}</p>
 								<p>[{{ data.dynasty }}] {{ data.birthYear }}-{{ data.deathYear }}</p>
 								<p>简介</p>
-								<p>{{ data.desc }}</p>
+								<p style="display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 4;overflow: hidden;">{{ data.desc }}</p>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 			<scrollTop />
+			<p class="mb-0" :class=" {'invisible': notEnd  }">没有更多了～</p>
 		</div>
 	</div>
 </template>
@@ -38,6 +39,7 @@
 				contentList: [],
 				dynasty: null,
 				busy: false,
+				notEnd: true,
 				dynastyList: [{
 						dynasty: "",
 						name: "不限",
@@ -123,31 +125,12 @@
 						name: "清",
 						isChoose: false,
 					},
-					// {
-					// 	name: "当代",
-					// 	isChoose: false,
-					// },
 					{
 						dynasty: "现代",
 						name: "现代",
 						isChoose: false,
 					},
 				],
-				// // 回到顶部参数
-				// scroll: {
-				// 	// 回到顶部的方式 0 - 马上回到顶部，css实现（默认） 1 - 匀速回到顶部，js实现
-				// 	way: 1,
-				// 	// 滚动多少像素显示“回到顶部”图标
-				// 	distance: 200,
-				// 	// 向上滚动间隔
-				// 	time: 600,
-				// 	// 运动方式 Bounce
-				// 	sportWay: 'Quad',
-				// 	// 缓急方式 easeInOut
-				// 	slowWay: 'easeIn',
-				// 	// 回到顶部后回调方法
-				// 	callback: this.onScollTop,
-				// },
 			};
 		},
 		components: {
@@ -155,12 +138,13 @@
 		},
 		mounted() {
 			this.onClick(this.dynastyList[0]);
-		},activated() {
-		    const scrollTop = this.$route.meta.scrollTop;
-		    const $content = document.querySelector('.mycontainer');
-		    if (scrollTop && $content) {
-		      $content.scrollTop = scrollTop;
-		    }
+		},
+		activated() {
+			const scrollTop = this.$route.meta.scrollTop;
+			const $content = document.querySelector('.mycontainer');
+			if (scrollTop && $content) {
+				$content.scrollTop = scrollTop;
+			}
 		},
 		methods: {
 			onClick(nowChooseItem) {
@@ -170,14 +154,16 @@
 					});
 					this.dynasty = nowChooseItem.dynasty;
 					this.contentList.length = 0;
+					this.notEnd = true;
 					this.getData();
 					nowChooseItem.isChoose = true;
 				}
 			},
 			getData() {
-				this.$http.get(this.$base.format("https://wx.tuhua.ink/api/app/libraryauthors?dynasty={0}", this.dynasty))
+				this.$http.get(this.$base.format(this.$store.state.url.getAuthor, this.dynasty))
 					.then(response => {
 						this.contentList = response.data;
+						this.notEnd = false;
 					})
 					.catch(err => {
 						console.log(err);
@@ -187,7 +173,9 @@
 				this.$router.push({
 					path: 'authorDetail',
 					query: {
-						author: input,
+						authorId: input.authorId,
+						dynasty: input.dynasty,
+						authorName: input.name,
 					}
 				})
 			}
@@ -197,8 +185,8 @@
 
 <style>
 	#author {
-		width: 95%;
-		height: calc(96vh - 31vw);
+		width: 100%;
+		height: calc(100vh - 28vw);
 		display: flex;
 		display: -webkit-flex;
 		flex-direction: column;
@@ -207,9 +195,9 @@
 	#author .mycontainer {
 		flex: 1;
 		width: 100%;
-		/* height: calc(109vh - 84vw); */
-		/* height: 100%; */
-		overflow-y: auto;
+		overflow-y: scroll;
+		-webkit-overflow-scrolling: touch;
+		padding: 0 2.5vw ;
 	}
 
 	#author .mycontainer p {
@@ -224,10 +212,13 @@
 		display: -webkit-flex;
 		flex-direction: row;
 		justify-content: left;
+		padding: 0 2.5vw ;
+		border-bottom: 1px solid #ddd;
+		/* box-shadow: 0px 1px 1px #ddd;
+		margin-bottom: 5px; */
 	}
 
 	#author .topbar p {
-		/* 		width: 15vw; */
 		font-size: 5vw;
 	}
 
@@ -250,6 +241,7 @@
 		color: #646464;
 		border-radius: 5px;
 		border: #dabc95 1px solid;
+		margin-bottom: 10px;
 	}
 
 	#author .dynastynowChoose {
@@ -263,10 +255,11 @@
 
 	#author .listItem {
 		width: 100%;
-		height: 25vh;
+		/* height: 25vh; */
 		border-radius: 10px;
 		border: #dabc95 1px solid;
 		padding: 0.5rem 1rem;
+		line-height: 1.8;
 	}
 
 	#author .listItembox {
